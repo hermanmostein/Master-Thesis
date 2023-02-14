@@ -163,10 +163,12 @@ class Env(AECEnv):
         self.state[agent] = action
         velocity_cap = np.sqrt(2)*abs(self.restrictions[0]
                                       [0] - self.restrictions[0][1])/40
+        '''r = self.iteration/self.max_iterations
+        velocity_cap *= 1 / (1 + np.exp(10*r - 5))'''
 
         if (action is not None and self.use_agent):
 
-            velocity = action
+            velocity = np.sign(action) * action**2
             velocity *= velocity_cap
 
         # Handles normal pso
@@ -188,6 +190,11 @@ class Env(AECEnv):
             copy.deepcopy(self.particle_pos[particle][_dim]), self.restrictions[_dim][1])
         self.particle_pos[particle][_dim] = max(
             copy.deepcopy(self.particle_pos[particle][_dim]), self.restrictions[_dim][0])
+
+        if(self.f(self.particle_pos[particle][_dim])):
+            #TODO: Implement simulated annealing mechanism for acceptance
+            a = 0
+
 
         self.get_reward(particle, _dim)
 
