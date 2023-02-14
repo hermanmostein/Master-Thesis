@@ -13,7 +13,7 @@ import copy
 import gym
 from gym import spaces
 import numpy as np
-from functions import *
+from utils.functions import *
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 import wandb
 

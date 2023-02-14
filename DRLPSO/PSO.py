@@ -3,12 +3,10 @@ import random
 import torch
 
 import wandb
-from environment import PSO
 from pz_environment import Env, new_env
 from pettingzoo.test import api_test, parallel_api_test
 from pettingzoo.utils.conversions import aec_to_parallel
-from functions import *
-from callback import TensorboardCallback
+from utils.functions import *
 import supersuit as ss
 import torch.nn as nn
 from tqdm import tqdm
