@@ -144,6 +144,9 @@ class Env(AECEnv):
         self.num_moves = 0
         self._agent_selector = agent_selector(self.agents)
         self.agent_selection = self._agent_selector.reset()
+        self.T_0 = self.mean_initial
+        self.T = self.T_0
+        self.alpha = 0.99
 
     def observe(self, agent):
 
@@ -186,14 +189,18 @@ class Env(AECEnv):
             self.particle_pos[particle][_dim])
         self.particle_velocity[particle][_dim] = velocity
         self.particle_pos[particle][_dim] += self.particle_velocity[particle][_dim]
+
+        #TODO: Implement simulated annealing mechanism for acceptance
+        '''diff = self.f(self.particle_pos[particle]) - self.f(self.particle_prev_pos[particle])
+        prob = np.exp(-diff/self.T)
+        if(np.random.random() >= prob):
+            self.particle_pos[particle][_dim] = copy.deepcopy(self.particle_prev_pos[particle][_dim])'''
+
         self.particle_pos[particle][_dim] = min(
             copy.deepcopy(self.particle_pos[particle][_dim]), self.restrictions[_dim][1])
         self.particle_pos[particle][_dim] = max(
             copy.deepcopy(self.particle_pos[particle][_dim]), self.restrictions[_dim][0])
 
-        if(self.f(self.particle_pos[particle][_dim])):
-            #TODO: Implement simulated annealing mechanism for acceptance
-            a = 0
 
 
         self.get_reward(particle, _dim)
@@ -218,6 +225,7 @@ class Env(AECEnv):
             self.improvement = 100*score/self.best_initial
             if (self.prod_mode):
                 wandb.log({"status/improvement": self.improvement})
+                wandb.log({"status/objective": score})
 
         self._cumulative_rewards[self.agent_selection] = 0
         self._accumulate_rewards()
@@ -226,6 +234,7 @@ class Env(AECEnv):
 
         if (self._agent_selector.is_last() and _dim == self.dimensions-1):
             self.iteration += 1
+            self.T *= self.alpha
 
     def close(self):
         return None

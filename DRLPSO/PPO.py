@@ -198,7 +198,7 @@ class Agent(nn.Module):
 
         )
         self.actor_mean = layer_init(
-            nn.Linear(64, np.prod(self.env.action_space.shape)), std=0.01)
+            nn.Linear(64, np.prod(self.env.action_space.shape)), std=0.0001)
         self.actor_logstd = nn.Parameter(
             torch.zeros(1, np.prod(self.env.action_space.shape)))
         self.critic = layer_init(nn.Linear(64, 1), std=1)

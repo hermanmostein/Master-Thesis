@@ -113,13 +113,13 @@ def diff_reward_end_rew(env, particle):
         env.reward[agent] += 1
         if (score_ < env.f(env.particle_best_pos[particle])):
 
-            env.reward[agent] += 2 + (diff/old)*10
+            env.reward[agent] += 2 + (diff/old)*5
 
             if (score_ < env.f(env.global_best_pos)):
-                env.reward[agent] += 2 + (diff/old)*15
+                env.reward[agent] += 2 + (diff/old)*5
 
     if (env.iteration == env.max_iterations):
-        env.reward[agent] += 1/(ratio+5e-4)
+        env.reward[agent] += 10/(ratio+5e-4)
 
 
 def final_score(env, particle):

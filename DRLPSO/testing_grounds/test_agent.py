@@ -1,11 +1,9 @@
 import os
 import random
 import torch
+import sys, os
+sys.path.append(os.path.abspath(os.path.join('..', 'pz_environment.py')))
 
-import wandb
-from pz_environment import Env, new_env
-from pettingzoo.test import api_test, parallel_api_test
-from pettingzoo.utils.conversions import aec_to_parallel
 from utils.functions import *
 import supersuit as ss
 import torch.nn as nn
@@ -19,24 +17,17 @@ import supersuit as ss
 from utils.reward_functions import *
 
 
-def run_pso(num_episodes, env_parameter_dict=False):
+def test_agent(num_episodes, agent, env, env_parameter_dict=False):
 
     #### DEFINE PARAMETERS ####
     env_parameter_dict = env_parameter_dict if env_parameter_dict else {
         "num_particles": 50,
         "dimensions": 2,
         "iterations": 100,
-        "reward_function": one_three_ten_bonus,
+        "reward_function": diff_reward_end_rew,
         "prod_mode": False,
     }
 
-    #### PREPARE ENVIRONMENT ####
-    agents = [f'agent_{num}' for num in range(
-        1, env_parameter_dict["num_particles"]+1)]
-    env = Env(
-        agents=agents, reward_function=env_parameter_dict["reward_function"],
-        dimensions=env_parameter_dict["dimensions"], iterations=env_parameter_dict["iterations"],
-        prod_mode=env_parameter_dict["prod_mode"], use_agent=False)
 
     #### MAIN LOOP ####
     tot_hist = []
@@ -50,15 +41,20 @@ def run_pso(num_episodes, env_parameter_dict=False):
             action = [[0.0]
                       for a in range(env_parameter_dict["num_particles"])]
 
+            obs = env.observe(env.agent_selection)
+            obs = torch.reshape(torch.tensor(obs), (1,5))
+
+            action, probs, ent = agent.get_action(obs)
+
             env.step(action)
         tot_hist.append(env.f(env.global_best_pos))
         initials.append(env.best_initial)
 
     avg = sum(tot_hist)/len(tot_hist)
     avg_improvement = sum([100*tot_hist[i]/initials[i]
-                          for i in range(num_episodes)])
-    print(f'Avg performance: {avg}')
-    return avg, griewangk(np.array([0, 0]))
+                          for i in range(num_episodes)])/len(range(num_episodes))
+    print(f'Avg performance: {avg}, avg improvement: {avg_improvement}')
+    return avg, avg_improvement
 
 
-a_avg, global_min = main(20, use_agent=False)
+#100 eps 10 dims, 23.834576
