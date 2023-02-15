@@ -102,6 +102,7 @@ class Env(AECEnv):
 
             self.s = random.random()
             get_func = random.sample(self.function_list, 1)[0]
+            #print(self.s)
             self.f = get_func(self.s)
         else:
             self.f = rastrigrin
@@ -147,6 +148,7 @@ class Env(AECEnv):
         self.T_0 = self.mean_initial
         self.T = self.T_0
         self.alpha = 0.99
+        self.done = False
 
     def observe(self, agent):
 
@@ -215,6 +217,7 @@ class Env(AECEnv):
         observation = self.make_observation(particle=particle, dim=_dim)
         self.observations[agent] = observation
         done = self.iteration > self.max_iterations
+        self.done = done
         info = {'global_best_score': self.f(self.global_best_pos)}
 
         if (done):

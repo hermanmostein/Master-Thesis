@@ -3,7 +3,6 @@ import random
 import torch
 import sys, os
 sys.path.append(os.path.abspath(os.path.join('..', 'pz_environment.py')))
-
 from utils.functions import *
 import supersuit as ss
 import torch.nn as nn
@@ -37,13 +36,10 @@ def test_agent(num_episodes, agent, env, env_parameter_dict=False):
         done = False
         count = 0
 
-        for step in range(env_parameter_dict["num_particles"]*env_parameter_dict["dimensions"]*env_parameter_dict["iterations"]):
-            action = [[0.0]
-                      for a in range(env_parameter_dict["num_particles"])]
+        while not env.done:
 
             obs = env.observe(env.agent_selection)
             obs = torch.reshape(torch.tensor(obs), (1,5))
-
             action, probs, ent = agent.get_action(obs)
 
             env.step(action)
