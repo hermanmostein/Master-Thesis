@@ -131,3 +131,5 @@ dmypy.json
 wandb/
 *.tfevents.*
 *events.out*
+
+.DS_Store
