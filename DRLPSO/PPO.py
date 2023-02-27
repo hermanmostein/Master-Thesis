@@ -113,7 +113,7 @@ class Agent(nn.Module):
                                  help='total timesteps of the experiments')
         self.parser.add_argument('--torch-deterministic', type=lambda x: bool(strtobool(x)), default=True, nargs='?', const=True,
                                  help='if toggled, `torch.backends.cudnn.deterministic=False`')
-        self.parser.add_argument('--cuda', type=lambda x: bool(strtobool(x)), default=True, nargs='?', const=True,
+        self.parser.add_argument('--cuda', type=lambda x: bool(strtobool(x)), default=False, nargs='?', const=True,
                                  help='if toggled, cuda will not be enabled by default')
 
         self.parser.add_argument('--prod-mode', type=lambda x: bool(strtobool(x)), default=hp_dict["prod_mode"], nargs='?', const=True,
@@ -179,8 +179,9 @@ class Agent(nn.Module):
 
         # petting zoo
 
-        self.device = torch.device('cuda' if torch.cuda.is_available()
-                                   and self.args.cuda else 'cpu')
+        print(torch.backends.mps.is_available())
+        self.device = torch.device('cpu' if torch.backends.mps.is_available()
+                                   else 'cpu')
         self.env = make_env(env=env, device=self.device)
 
         self.args.num_envs = self.env.num_envs
@@ -196,12 +197,13 @@ class Agent(nn.Module):
             layer_init(nn.Linear(128, 64)),
             nn.ReLU(),
 
-        )
-        self.actor_mean = layer_init(
-            nn.Linear(64, np.prod(self.env.action_space.shape)), std=0.0001)
+        ).to(self.device)
+        self.actor_mean = nn.Sequential(layer_init(
+            nn.Linear(64, np.prod(self.env.action_space.shape)), std=0.0001).to(self.device),
+            nn.Sigmoid())
         self.actor_logstd = nn.Parameter(
             torch.zeros(1, np.prod(self.env.action_space.shape)))
-        self.critic = layer_init(nn.Linear(64, 1), std=1)
+        self.critic = layer_init(nn.Linear(64, 1), std=1).to(self.device)
 
         self.optimizer = optim.Adam(
             self.parameters(), lr=self.args.learning_rate, eps=1e-5)
@@ -229,15 +231,17 @@ class Agent(nn.Module):
 
     def get_action(self, x, action=None):
 
+        x.to(self.device)
         action_mean = self.actor_mean(self.network(x))
         action_logstd = self.actor_logstd.expand_as(action_mean)
-        action_std = torch.exp(action_logstd)
+        action_std = torch.exp(action_logstd).to(self.device)
         probs = Normal(action_mean, action_std)
         if action is None:
-            action = probs.sample()
+            action = probs.sample().to(self.device)
         return action, probs.log_prob(action).sum(1), probs.entropy().sum(1)
 
     def get_value(self, x):
+        x = x.to(self.device)
         return self.critic(self.network(x))
 
     def train(self):
