@@ -20,11 +20,11 @@ def main(agent, env_parameter_dict=None):
         "reward_function": final_score
     }
     hp_dict = {
-        "prod_mode": True,
+        "prod_mode": False,
         "gamma": 1,
         "learning_rate": 5e-4,
         "clip_coef": 0.2,
-        "total_timesteps": 1000000
+        "total_timesteps": 10000
     }
     parameter_dict = {**env_parameter_dict, **hp_dict}
 
@@ -63,7 +63,7 @@ def main(agent, env_parameter_dict=None):
     env.set_mode('Train')
 
     pso_obj, pso_imp = run_pso(
-        50, env=env, env_parameter_dict=env_parameter_dict)
+        1, env=env, env_parameter_dict=env_parameter_dict)
 
     env = Env(
         agents=agents, reward_function=env_parameter_dict["reward_function"],
@@ -71,7 +71,7 @@ def main(agent, env_parameter_dict=None):
         prod_mode=False, use_agent=True)
     # env = agent_env
     drlpso_obj, drlpso_imp = test_agent(
-        50, agent, env, env_parameter_dict=env_parameter_dict)
+        3, agent, env, env_parameter_dict=env_parameter_dict)
 
 
 main(None)

@@ -36,6 +36,7 @@ def test_agent(num_episodes, agent, env, env_parameter_dict=False):
         done = False
         count = 0
         action_size = []
+        length = 0
 
         while not env.done:
             obs = env.observe(env.agent_selection)
@@ -44,8 +45,10 @@ def test_agent(num_episodes, agent, env, env_parameter_dict=False):
 
             env.step(action)
             action_size.append(action)
+            length += 1
         tot_hist.append(env.f(env.global_best_pos))
         initials.append(env.best_initial)
+        print(length)
 
     avg = sum(tot_hist)/len(tot_hist)
     avg_improvement = sum([100*tot_hist[i]/initials[i]
