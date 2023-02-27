@@ -18,7 +18,7 @@ sys.path.append(os.path.abspath(os.path.join('..', 'pz_environment.py')))
 
 def test_agent(num_episodes, agent, env, env_parameter_dict=False):
 
-    #### DEFINE PARAMETERS ####
+    # DEFINE PARAMETERS #### Only used if input not defined
     env_parameter_dict = env_parameter_dict if env_parameter_dict else {
         "num_particles": 50,
         "dimensions": 2,
@@ -55,6 +55,3 @@ def test_agent(num_episodes, agent, env, env_parameter_dict=False):
                           for i in range(num_episodes)])/len(range(num_episodes))
     print(f'Avg performance: {avg}, avg improvement: {avg_improvement}')
     return avg, avg_improvement
-
-
-# 100 eps 10 dims, 23.834576

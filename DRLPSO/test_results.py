@@ -20,10 +20,11 @@ def main(agent, env_parameter_dict=None):
         "reward_function": final_score
     }
     hp_dict = {
-        "prod_mode": False,
+        "prod_mode": False,  # Logs to wand when True
         "gamma": 1,
         "learning_rate": 5e-4,
         "clip_coef": 0.2,
+        # For a decent agent, this should be 1000000 but will train for 5 mins ish
         "total_timesteps": 10000
     }
     parameter_dict = {**env_parameter_dict, **hp_dict}
@@ -36,6 +37,7 @@ def main(agent, env_parameter_dict=None):
         dimensions=env_parameter_dict["dimensions"], iterations=env_parameter_dict["iterations"],
         prod_mode=parameter_dict["prod_mode"], use_agent=True)
 
+    # Makes the vectorized envs that the agent trains on
     agent_env = copy.deepcopy(env)
     agent_env.set_mode('Train')
     agent_env = aec_to_parallel(agent_env)
@@ -54,7 +56,7 @@ def main(agent, env_parameter_dict=None):
     if (hp_dict["prod_mode"]):
         agent.save_model()
 
-    # print(agent.get_action(torch.tensor(([0.5, 0.5, 0.5, 0.5, 0.5]))))
+    #### TEST PSO ####
 
     env = Env(
         agents=agents, reward_function=env_parameter_dict["reward_function"],
@@ -65,11 +67,13 @@ def main(agent, env_parameter_dict=None):
     pso_obj, pso_imp = run_pso(
         1, env=env, env_parameter_dict=env_parameter_dict)
 
+    #### TEST DRLPSO ####
+
     env = Env(
         agents=agents, reward_function=env_parameter_dict["reward_function"],
         dimensions=env_parameter_dict["dimensions"], iterations=env_parameter_dict["iterations"],
         prod_mode=False, use_agent=True)
-    # env = agent_env
+
     drlpso_obj, drlpso_imp = test_agent(
         3, agent, env, env_parameter_dict=env_parameter_dict)
 

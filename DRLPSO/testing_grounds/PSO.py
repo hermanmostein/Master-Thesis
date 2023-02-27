@@ -40,6 +40,3 @@ def run_pso(num_episodes, env, env_parameter_dict):
                           for i in range(num_episodes)])/len(range(num_episodes))
     print(f'Avg performance: {avg}, avg improvement: {avg_improvement}')
     return avg, avg_improvement
-
-
-#100 eps 10 dims, 23.834576

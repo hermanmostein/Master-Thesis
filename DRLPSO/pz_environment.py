@@ -81,10 +81,6 @@ class Env(AECEnv):
         self.observation_spaces = {agent: Box(
             low=-1, high=1, shape=(5,)) for agent in self.possible_agents}
         self.render_mode = None
-        '''self.observation_space = Box(
-            low=-1, high=1, shape=(5,))
-        self.action_space = Box(
-            low=-1, high=1, shape=(1,))'''
 
     @functools.lru_cache(maxsize=None)
     def observation_space(self, agent=0):
@@ -103,7 +99,7 @@ class Env(AECEnv):
 
             self.s = random.random()
             get_func = random.sample(self.function_list, 1)[0]
-            #print(self.s)
+            # print(self.s)
             self.f = get_func(self.s)
         else:
             self.f = rastrigrin
@@ -174,6 +170,7 @@ class Env(AECEnv):
 
         if (action is not None and self.use_agent):
 
+            # This is so the agent can make smaller steps
             velocity = np.sign(action) * action**2
             velocity *= velocity_cap
 
@@ -193,18 +190,10 @@ class Env(AECEnv):
         self.particle_velocity[particle][_dim] = velocity
         self.particle_pos[particle][_dim] += self.particle_velocity[particle][_dim]
 
-        #TODO: Implement simulated annealing mechanism for acceptance
-        '''diff = self.f(self.particle_pos[particle]) - self.f(self.particle_prev_pos[particle])
-        prob = np.exp(-diff/self.T)
-        if(np.random.random() >= prob):
-            self.particle_pos[particle][_dim] = copy.deepcopy(self.particle_prev_pos[particle][_dim])'''
-
         self.particle_pos[particle][_dim] = min(
             copy.deepcopy(self.particle_pos[particle][_dim]), self.restrictions[_dim][1])
         self.particle_pos[particle][_dim] = max(
             copy.deepcopy(self.particle_pos[particle][_dim]), self.restrictions[_dim][0])
-
-
 
         self.get_reward(particle, _dim)
 
