@@ -1,6 +1,8 @@
 from utils.reward_functions import *
 from stable_baselines3 import PPO
 from PPO import Agent, make_env
+from pettingzoo.utils.conversions import aec_to_parallel
+import supersuit as ss
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -30,26 +32,34 @@ def test_agent(num_episodes, agent, env, env_parameter_dict=False):
     #### MAIN LOOP ####
     tot_hist = []
     initials = []
-    env.set_mode('Train')
     for episode in tqdm(range(num_episodes)):
         obs = env.reset()
-        done = False
-        count = 0
         action_size = []
-        length = 0
+        count = 0
+        done = False
 
-        while not env.done:
-            obs = env.observe(env.agent_selection)
-            obs = torch.reshape(torch.tensor(obs, dtype=torch.float32), (1, 5))
+        while not done:
+            obs = torch.reshape(torch.tensor(
+                obs, dtype=torch.float32), (1, 5))
+            # print(f'Observation in step {count}: {obs}')
             action, probs, ent = agent.get_action(obs)
+            # print(f'Action in step {count}: {action}')
 
-            env.step(action)
+            obs, rs, done, infos = env.step(torch.clamp(
+                action, -1, 1))
+            # print(obs)
             action_size.append(action)
-            length += 1
+            count += 1
+            # print(f'Best found score: {env.f(env.global_best_pos)}')
+
+            # obs = env.observations[env.agent_selection]
+            # obs = env.observe(env.agent_selection)
+
         tot_hist.append(env.f(env.global_best_pos))
         initials.append(env.best_initial)
-        print(length)
 
+    plt.plot(range(len(tot_hist)), tot_hist)
+    plt.show()
     avg = sum(tot_hist)/len(tot_hist)
     avg_improvement = sum([100*tot_hist[i]/initials[i]
                           for i in range(num_episodes)])/len(range(num_episodes))

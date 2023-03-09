@@ -65,7 +65,7 @@ def main(agent, env_parameter_dict=None):
     env.set_mode('Train')
 
     pso_obj, pso_imp = run_pso(
-        1, env=env, env_parameter_dict=env_parameter_dict)
+        3, env=env, env_parameter_dict=env_parameter_dict)
 
     #### TEST DRLPSO ####
 

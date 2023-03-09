@@ -30,8 +30,8 @@ def zakharov(coo):
     return first + second + third
 
 
-def rastrigrin(coo):
-    #minimum = [0, ..., 0]
+def rastrigrin(coo, size=20):
+    # minimum = [0, ..., 0]
     if (coo is None):
         return np.ones((20, 2))*[-5.12, 5.12]
     A = 10
@@ -40,7 +40,7 @@ def rastrigrin(coo):
 
 
 def rosenbrock(coo):
-    #minimum = [1, ..., 1]
+    # minimum = [1, ..., 1]
     if (coo is None):
         return np.ones((20, 2))*[-10, 10]
     forward = coo[1:]
@@ -71,7 +71,7 @@ def translated_rastrigin(r=0.5):
     # minimum = [-r, ..., -r]
     def f(coo):
         if (coo is None):
-            return np.ones((20, 2))*[-5.12, 5.12]
+            return np.ones((2, 2))*[-5.12, 5.12]
         fill = 5*r - 2
         c = np.full_like(coo, fill, dtype=np.double)
         A = 10

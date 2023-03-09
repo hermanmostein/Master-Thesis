@@ -178,8 +178,6 @@ class Agent(nn.Module):
         torch.backends.cudnn.deterministic = self.args.torch_deterministic
 
         # petting zoo
-
-        print(torch.backends.mps.is_available())
         self.device = torch.device('cpu' if torch.backends.mps.is_available()
                                    else 'cpu')
         self.env = make_env(env=env, device=self.device)

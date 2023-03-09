@@ -77,12 +77,12 @@ class Env(AECEnv):
         self.agent_selection = self._agent_selector.reset()
 
         self.action_spaces = {agent: Box(
-            low=-1, high=2, shape=(1,)) for agent in self.possible_agents}
+            low=-1, high=1, shape=(1,)) for agent in self.possible_agents}
         self.observation_spaces = {agent: Box(
             low=-1, high=1, shape=(5,)) for agent in self.possible_agents}
         self.render_mode = None
 
-    @functools.lru_cache(maxsize=None)
+    '''@functools.lru_cache(maxsize=None)
     def observation_space(self, agent=0):
         # gymnasium spaces are defined and documented here: https://gymnasium.farama.org/api/spaces/
         return Box(
@@ -92,6 +92,7 @@ class Env(AECEnv):
     def action_space(self, agent=0):
         return Box(
             low=-1, high=1, shape=(1,))
+'''
 
     def reset(self, seed=None, return_info=False, options=None):
 
@@ -99,7 +100,6 @@ class Env(AECEnv):
 
             self.s = random.random()
             get_func = random.sample(self.function_list, 1)[0]
-            # print(self.s)
             self.f = get_func(self.s)
         else:
             self.f = rastrigrin
@@ -146,6 +146,8 @@ class Env(AECEnv):
         self.T = self.T_0
         self.alpha = 0.99
         self.done = False
+
+        return observation
 
     def observe(self, agent):
 
@@ -208,7 +210,8 @@ class Env(AECEnv):
         self.observations[agent] = observation
         done = self.iteration > self.max_iterations
         self.done = done
-        info = {'global_best_score': self.f(self.global_best_pos)}
+        info = {'global_best_score': self.f(
+            self.global_best_pos), 'best_initial': self.best_initial}
 
         if (done):
             if (self._agent_selector.is_last()):
@@ -228,6 +231,8 @@ class Env(AECEnv):
         if (self._agent_selector.is_last() and _dim == self.dimensions-1):
             self.iteration += 1
             self.T *= self.alpha
+
+        return self.observations[self.agent_selection], self.rewards[self.agent_selection], self.done, info
 
     def close(self):
         return None
