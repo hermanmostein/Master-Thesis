@@ -279,13 +279,13 @@ class Agent(nn.Module):
                 self.rewards[step], next_done = rs.view(
                     -1), torch.Tensor(ds).to(self.device)
 
-                for info in infos:
+                '''for info in infos:
                     if 'episode' in info.keys():
                         print(
                             f"global_step={global_step}, episode_reward={info['episode']['r']}")
                         self.writer.add_scalar("charts/episode_reward",
                                                info['episode']['r'], global_step)
-                        break
+                        break'''
 
             # bootstrap reward if not done. reached the batch limit
             with torch.no_grad():

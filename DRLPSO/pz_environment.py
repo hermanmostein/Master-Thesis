@@ -209,9 +209,10 @@ class Env(AECEnv):
         observation = self.make_observation(particle=particle, dim=_dim)
         self.observations[agent] = observation
         done = self.iteration > self.max_iterations
-        self.done = done
-        info = {'global_best_score': self.f(
-            self.global_best_pos), 'best_initial': self.best_initial}
+        self.done = {agent: done for agent in self.agents}
+        self.truncations = self.done
+        self.infos = {agent: {'Best score': self.f(
+            self.global_best_pos), 'Initial': self.best_initial} for agent in self.agents}
 
         if (done):
             if (self._agent_selector.is_last()):
@@ -232,7 +233,7 @@ class Env(AECEnv):
             self.iteration += 1
             self.T *= self.alpha
 
-        return self.observations[self.agent_selection], self.rewards[self.agent_selection], self.done, info
+        return self.observations[self.agent_selection], self.rewards[self.agent_selection], self.done, self.truncations, self.infos
 
     def close(self):
         return None

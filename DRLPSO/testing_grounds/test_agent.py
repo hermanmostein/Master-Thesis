@@ -18,6 +18,16 @@ import os
 sys.path.append(os.path.abspath(os.path.join('..', 'pz_environment.py')))
 
 
+def dict_to_torch(d):
+    obs = np.array([d[a] for a in d.keys()])
+    return torch.reshape(torch.tensor(
+        obs, dtype=torch.float32), (50, 5))
+
+
+def action_to_dict(a, env):
+    return dict(zip(env.agents, a))
+
+
 def test_agent(num_episodes, agent, env, env_parameter_dict=False):
 
     # DEFINE PARAMETERS #### Only used if input not defined
@@ -39,29 +49,22 @@ def test_agent(num_episodes, agent, env, env_parameter_dict=False):
         done = False
 
         while not done:
-            obs = torch.reshape(torch.tensor(
-                obs, dtype=torch.float32), (1, 5))
-            # print(f'Observation in step {count}: {obs}')
+            obs = dict_to_torch(obs)
             action, probs, ent = agent.get_action(obs)
-            # print(f'Action in step {count}: {action}')
-
-            obs, rs, done, infos = env.step(torch.clamp(
-                action, -1, 1))
-            # print(obs)
+            action = action.squeeze()
+            action = action_to_dict(action, env)
+            obs, rewards, terminations, truncations, infos = env.step(action)
+            done = True in terminations.values()
             action_size.append(action)
             count += 1
-            # print(f'Best found score: {env.f(env.global_best_pos)}')
 
-            # obs = env.observations[env.agent_selection]
-            # obs = env.observe(env.agent_selection)
+        tot_hist.append(infos['agent_1']['Best score'])
+        initials.append(infos['agent_1']['Initial'])
 
-        tot_hist.append(env.f(env.global_best_pos))
-        initials.append(env.best_initial)
-
-    plt.plot(range(len(tot_hist)), tot_hist)
-    plt.show()
     avg = sum(tot_hist)/len(tot_hist)
     avg_improvement = sum([100*tot_hist[i]/initials[i]
                           for i in range(num_episodes)])/len(range(num_episodes))
     print(f'Avg performance: {avg}, avg improvement: {avg_improvement}')
+    plt.plot(range(len(tot_hist)), tot_hist)
+    plt.show()
     return avg, avg_improvement
